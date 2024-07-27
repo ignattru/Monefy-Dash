@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <title>Дашборд • Monefy Dash</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" th:href="@{assets/images/favicon.ico}">
+        <!-- Bootstrap Css -->
+        <link th:href="@{assets/css/bootstrap.min.css}" id="bootstrap-style" rel="stylesheet" type="text/css" />
+        <!-- Icons Css -->
+        <link th:href="@{assets/css/icons.min.css}" rel="stylesheet" type="text/css" />
+        <!-- App Css-->
+        <link th:href="@{assets/css/app.min.css}" id="app-style" rel="stylesheet" type="text/css" />
+        <!-- DataTables -->
+        <link th:href="@{assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css}" rel="stylesheet" type="text/css" />
+        <link th:href="@{assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css}" rel="stylesheet" type="text/css" />
+        <style type="text/css">
+            .progress {
+                font-size: medium;
+            }
+
+            .bg-success {
+                background-color:#399918!important
+            }
+
+            .bg-danger {
+                background-color:#FF7777!important
+            }
+
+        </style>
+    </head>
+
+    <body data-sidebar="dark">
+        <!-- Begin page -->
+        <div id="layout-wrapper">
+            <header id="page-topbar">
+                <div class="navbar-header">
+                    <div class="d-flex">
+                        <div class="dropdown d-inline-block">
+                            <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect">
+                                <img class="rounded-circle header-profile-user" src="assets/images/logo.png">
+                                <span class="d-none d-xl-inline-block ms-1"><a class="nav-link py-1 px-0" href="/">Monefy Dash</a></span>
+                            </button>
+                            <div class="dropdown d-inline-block">
+                                <span class="d-none d-xl-inline-block ms-1" ><a class="nav-link py-1 px-0" href="start">Загрузить CSV</a></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div class="main-content">
+                <div class="page-content">
+                    <div class="container-fluid">
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                                    <h4 class="mb-sm-0">Топ 4 категории расходов:</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- top categories -->
+                        <div class="row">
+                            <div class="col-xl-3 col-sm-6" th:each="entry, iterStat : ${expenseByCategoryTop.entrySet()}">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex text-muted">
+                                            <div class="flex-shrink-0 me-3 align-self-center">
+                                                <div th:id="'radialchart-' + ${iterStat.count}" class="apex-charts" dir="ltr"></div>
+                                            </div>
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <p class="mb-1" th:text="${entry.key}"></p>
+                                                <h5 class="mb-3" th:text="${entry.value}"></h5>
+                                                <p class="text-truncate mb-0" th:text="'№'+ ${iterStat.count}"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end top categories -->
+
+                        <!-- chart expenses and income -->
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div>
+                                            <div id="line_chart_datalabel" class="apex-charts" dir="ltr"></div>
+                                        </div>
+                                    </div>
+                                    <!-- end card-body -->
+                                </div>
+                                <!-- end card -->
+                            </div>
+                            <!-- end col -->
+                        </div>
+                        <!-- end chart expenses and income -->
+
+                        <div class="row">
+                            <div class="col-xl-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Статистика за все время</h5>
+                                        <hr>
+                                        <div>
+                                            <ul class="list-unstyled">
+                                                <div class="row">
+                                                    <!-- Доходы -->
+                                                    <div class="col-sm-6">
+                                                        <li class="py-1">
+                                                            <div class="d-flex">
+                                                                <div class="avatar-sm align-self-center me-3">
+                                                                    <div class="avatar-title rounded-circle bg-light text-primary font-size-22">
+                                                                        <i class="ri-wallet-3-line"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <p class="text-muted mb-2">Доход за все время</p>
+                                                                    <h4><span th:text="${totalIncome}" class="badge bg-success"></span></h4>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li class="py-1">
+                                                            <div class="d-flex">
+                                                                <div class="avatar-sm align-self-center me-3">
+                                                                    <div class="avatar-title rounded-circle bg-light text-primary font-size-22">
+                                                                        <i class="ri-money-dollar-circle-line"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <p class="text-muted mb-2">Максимальный доход</p>
+                                                                    <h4><span th:text="${maxMonthlyIncome}" class="badge bg-success"></span></h4>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li class="py-1">
+                                                            <div class="d-flex">
+                                                                <div class="avatar-sm align-self-center me-3">
+                                                                    <div class="avatar-title rounded-circle bg-light text-primary font-size-22">
+                                                                        <i class="ri-coins-line"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <p class="text-muted mb-2">Минимальный доход</p>
+                                                                    <h4><span th:text="${minMonthlyIncome}" class="badge bg-success"></span></h4>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li class="py-1">
+                                                            <div class="d-flex">
+                                                                <div class="avatar-sm align-self-center me-3">
+                                                                    <div class="avatar-title rounded-circle bg-light text-primary font-size-22">
+                                                                        <i class="ri-hashtag"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <p class="text-muted mb-2">Строк в файле</p>
+                                                                    <h4><span th:text="${fileNumRecords}" class="badge bg-light"></span></h4>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    </div>
+                                                    <!-- /Доходы -->
+
+                                                    <!-- Расходы -->
+                                                    <div class="col-sm-6">
+                                                        <li class="py-1">
+                                                            <div class="d-flex">
+                                                                <div class="avatar-sm align-self-center me-3">
+                                                                    <div class="avatar-title rounded-circle bg-light text-primary font-size-22">
+                                                                        <i class="ri-wallet-line"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <p class="text-muted mb-2">Расход за все время</p>
+                                                                    <h4><span th:text="${totalExpence}" class="badge bg-danger"></span></h4>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li class="py-1">
+                                                            <div class="d-flex">
+                                                                <div class="avatar-sm align-self-center me-3">
+                                                                    <div class="avatar-title rounded-circle bg-light text-primary font-size-22">
+                                                                        <i class="ri-money-dollar-circle-fill"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <p class="text-muted mb-2">Максимальный расход</p>
+                                                                    <h4><span th:text="${maxMonthlyExpence}" class="badge bg-danger"></span></h4>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li class="py-1">
+                                                            <div class="d-flex">
+                                                                <div class="avatar-sm align-self-center me-3">
+                                                                    <div class="avatar-title rounded-circle bg-light text-primary font-size-22">
+                                                                        <i class="ri-coins-fill"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <p class="text-muted mb-2">Минимальный расход</p>
+                                                                    <h4><span th:text="${minMonthlyExpence}" class="badge bg-danger"></span></h4>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li class="py-1">
+                                                            <div class="d-flex">
+                                                                <div class="avatar-sm align-self-center me-3">
+                                                                    <div class="avatar-title rounded-circle bg-light text-primary font-size-22">
+                                                                        <i class="ri-save-3-fill"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <p class="text-muted mb-2">Размер файла, Кбайт</p>
+                                                                    <h4><span th:text="${fileSize}" class="badge bg-light"></span></h4>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    </div>
+                                                    <!-- /Расходы -->
+                                                </div>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- end card-body -->
+                                </div>
+                                <!-- end card -->
+                            </div>
+                            <!-- end col -->
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title">Доходы и расходы по месяцам</h4>
+                                        <hr>
+                                        <div class="row">
+                                            <!-- Доходы -->
+                                            <div class="col-sm-6" style="max-height: 300px; overflow-y: auto;">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Месяц</th>
+                                                        <th>Доход</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr th:each="entry : ${monthlyIncomeAmountByType.entrySet()}">
+                                                        <td th:text="${entry.key}"></td>
+                                                        <td th:text="${entry.value}"></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- Расходы -->
+                                            <div class="col-sm-6" style="max-height: 300px; overflow-y: auto;">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Месяц</th>
+                                                        <th>Расход</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr th:each="entry : ${monthlyExpenceAmountByType.entrySet()}">
+                                                        <td th:text="${entry.key}"></td>
+                                                        <td th:text="${entry.value}"></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div> <!-- end card-body -->
+                                </div> <!-- end card -->
+                            </div> <!-- end col -->
+
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title">Расходы по категориям</h4>
+                                        <hr>
+                                        <div id="donut_chart" class="apex-charts"  dir="ltr"></div>
+                                    </div>
+                                    <!-- end card-body -->
+                                </div>
+                                <!-- end card -->
+                            </div>
+                            <!-- end col -->
+                        </div>
+                        <!-- end row -->
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title">Все транзакции</h4>
+                                        <p class="card-title-desc">Таблица со всеми транзакциями за все время.</p>
+                                        <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Дата</th>
+                                                    <th>Категория</th>
+                                                    <th>Размер</th>
+                                                    <th>Описание</th>
+                                                </tr>
+                                            </thead>
+                                                <tbody>
+                                                    <tr th:each="transaction : ${transactions}">
+                                                        <td th:text="${transaction.getFormattedDate}"></td>
+                                                        <td th:text="${transaction.category}"></td>
+                                                        <td th:text="${transaction.amount}"></td>
+                                                        <td th:text="${transaction.description}"></td>
+                                                    </tr>
+                                                </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div> <!-- end col -->
+                        </div>
+                        <!-- end row -->
+                    </div>
+                    <!-- container-fluid -->
+                </div>
+                <!-- End Page-content -->
+            </div>
+            <!-- end main content-->
+        </div>
+
+        <!-- js -->
+        <script th:src="@{assets/libs/jquery/jquery.min.js}"></script>
+        <script th:src="@{assets/libs/bootstrap/js/bootstrap.bundle.min.js}" src=""></script>
+
+        <!-- apexcharts js -->
+        <script th:src="@{assets/libs/apexcharts/apexcharts.min.js}"></script>
+
+        <!-- Required datatable js -->
+        <script th:src="@{assets/libs/datatables.net/js/jquery.dataTables.min.js}"></script>
+        <script th:src="@{assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js}"></script>
+        
+        <!-- Datatable init js -->
+        <script th:src="@{assets/js/pages/datatables.init.js}"></script>
+
+        <!-- Responsive examples -->
+        <script th:src="@{assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js}"></script>
+        <script th:src="@{assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js}" ></script>
+
+        <script th:inline="javascript">
+            $(document).ready(function(){
+                var options, chart;
+
+                // Данные о доходах и расходах в месяц для линейного графика
+                var timeData = [];
+                var incomeData = [];
+                var expenseData = [];
+
+                // Планка минимального максимального значения для линейного графика
+                var minValueForPlot = 0;
+                var maxIncome = [[${maxMonthlyIncome}]];
+                var maxExpence = [[${minMonthlyExpenceAbs}]];
+                var maxValueForPlot = Math.max(maxIncome, maxExpence);
+
+                console.log('maxIncome Data:', maxIncome);
+                console.log('maxExpence Data:', maxExpence);
+                console.log('maxValueForPlot Data:', maxValueForPlot);
+
+
+                // Все категории и суммы затрат по ним за все время
+                var expenseCategory = [];
+                var expenseSumByCategory = [];
+
+                // Топ-4 категории и суммы затрат по ним
+                var expenseCategoryTop = [];
+                var expenseSumByCategoryTop = [];
+
+                // Для расчета процента от общего расхода
+                var expensePercentByCategoryTop = [];
+                var totalExpence = [[${totalExpence}]];
+
+
+                // Передача данных с бэка на страницу
+                /*[# th:each="entry : ${incomeData}"]*/
+                timeData.push([[${entry.key}]]);
+                incomeData.push([[${entry.value}]]);
+                /*[/]*/
+
+                /*[# th:each="entry : ${expenseData}"]*/
+                expenseData.push([[${entry.value}]]);
+                /*[/]*/
+
+                /*[# th:each="entry : ${expenseByCategory}"]*/
+                expenseCategory.push([[${entry.key}]]);
+                expenseSumByCategory.push([[${entry.value}]]);
+                /*[/]*/
+
+                /*[# th:each="entry : ${expenseByCategoryTop}"]*/
+                expenseCategoryTop.push([[${entry.key}]]);
+                expenseSumByCategoryTop.push([[${entry.value}]]);
+                /*[/]*/
+
+                for (var i = 0; i < expenseSumByCategoryTop.length; i++) {
+                    // Вычисление процента и округление до целого числа
+                    var percent = Math.abs(Math.round((expenseSumByCategoryTop[i] / totalExpence) * 100));
+                    expensePercentByCategoryTop.push(percent);
+                }
+
+
+                console.log('Income Data:', incomeData);
+                console.log('Expense Data:', expenseData);
+                console.log('time Data:', timeData);
+                console.log('expenseCategory', expenseCategory);
+                console.log('expenseSumByCategory:', expenseSumByCategory);
+                console.log('expenseCategoryTop', expenseCategoryTop);
+                console.log('expenseSumByCategoryTop:', expenseSumByCategoryTop);
+                console.log('expensePercentByCategoryTop:', expensePercentByCategoryTop);
+
+                if ($("#line_chart_datalabel").length) {
+                    options = {
+                        chart: {
+                            height: 500,
+                            type: "line",
+                            zoom: {
+                                enabled: true,
+                            },
+                            toolbar: {
+                                show: false
+                            }
+                        },
+                        colors: ["#399918", "#FF7777"],
+                        dataLabels: {
+                            enabled: false,
+                        },
+                        stroke: {
+                            width: [3, 3],
+                            curve: "smooth"
+                        },
+                        series: [{
+                            name: "Доходы",
+                            data: incomeData
+                        },
+                            {
+                                name: "Расходы",
+                                data: expenseData
+                            }
+                        ],
+                        title: {
+                            text: "График расходов и доходов",
+                            align: "left"
+                        },
+                        grid: {
+                            row: {
+                                colors: ["transparent", "transparent"],
+                                opacity: 0.8
+                            },
+                            borderColor: "#ffffff"
+                        },
+                        markers: {
+                            style: "inverted",
+                            size: 3
+                        },
+                        xaxis: {
+                            categories: timeData,
+                            title: {
+                                text: "Время"
+                            }
+                        },
+                        yaxis: {
+                            title: {
+                                text: "Деньги"
+                            },
+                            min: minValueForPlot,
+                            max: maxValueForPlot
+                        },
+                        legend: {
+                            position: "top",
+                            horizontalAlign: "right",
+                            floating: true,
+                            offsetY: -25,
+                            offsetX: -5
+                        },
+                        responsive: [{
+                            breakpoint: 200,
+                            options: {
+                                chart: {
+                                    toolbar: {
+                                        show: true
+                                    }
+                                },
+                                legend: {
+                                    show: false
+                                }
+                            }
+                        }]
+                    };
+                    chart = new ApexCharts(document.querySelector("#line_chart_datalabel"), options);
+                    chart.render();
+                }
+
+                function generateRandomColor() {
+                    var letters = '0123456789ABCDEF';
+                    var color = '#';
+                    for (var i = 0; i < 6; i++) {
+                        color += letters[Math.floor(Math.random() * 16)];
+                    }
+                    return color;
+                }
+
+                // Генерация цветов для каждой категории
+                var colors = [];
+                for (var i = 0; i < expenseCategory.length; i++) {
+                    colors.push(generateRandomColor());
+                }
+
+                var donutoptions = {
+                    chart: {
+                        height: 300,
+                        type: "donut"
+                    },
+                    series: expenseSumByCategory,
+                    labels: expenseCategory,
+                    colors: colors,
+                };
+
+                var donutchart = new ApexCharts(document.querySelector("#donut_chart"), donutoptions);
+                donutchart.render();
+
+            var radialoptions = {
+                series: [expensePercentByCategoryTop[0]],
+                chart: {
+                    type: "radialBar",
+                    width: 72,
+                    height: 72,
+                    sparkline: {
+                        enabled: true
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                colors: ["#FF7777"],
+                stroke: {
+                    lineCap: "round"
+                },
+                plotOptions: {
+                    radialBar: {
+                        hollow: {
+                            margin: 0,
+                            size: "70%"
+                        },
+                        track: {
+                            margin: 0
+                        },
+                        dataLabels: {
+                            name: {
+                                show: false
+                            },
+                            value: {
+                                offsetY: 5,
+                                show: true
+                            }
+                        }
+                    }
+                }
+            };
+
+            var radialchart = new ApexCharts(document.querySelector("#radialchart-1"), radialoptions);
+            radialchart.render();
+
+            var radialoptions = {
+                series: [expensePercentByCategoryTop[1]],
+                chart: {
+                    type: "radialBar",
+                    width: 72,
+                    height: 72,
+                    sparkline: {
+                        enabled: true
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                colors: ["#FF7777"],
+                stroke: {
+                    lineCap: "round"
+                },
+                plotOptions: {
+                    radialBar: {
+                        hollow: {
+                            margin: 0,
+                            size: "70%"
+                        },
+                        track: {
+                            margin: 0
+                        },
+                        dataLabels: {
+                            name: {
+                                show: false
+                            },
+                            value: {
+                                offsetY: 5,
+                                show: true
+                            }
+                        }
+                    }
+                }
+            };
+
+            var radialchart2 = new ApexCharts(document.querySelector("#radialchart-2"), radialoptions);
+            radialchart2.render();
+
+            var radialoptions = {
+                series: [expensePercentByCategoryTop[2]],
+                chart: {
+                    type: "radialBar",
+                    width: 72,
+                    height: 72,
+                    sparkline: {
+                        enabled: true
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                colors: ["#FF7777"],
+                stroke: {
+                    lineCap: "round"
+                },
+                plotOptions: {
+                    radialBar: {
+                        hollow: {
+                            margin: 0,
+                            size: "70%"
+                        },
+                        track: {
+                            margin: 0
+                        },
+                        dataLabels: {
+                            name: {
+                                show: false
+                            },
+                            value: {
+                                offsetY: 5,
+                                show: true
+                            }
+                        }
+                    }
+                }
+            };
+
+            var radialchart3 = new ApexCharts(document.querySelector("#radialchart-3"), radialoptions);
+            radialchart3.render();
+
+            var radialoptions = {
+                series: [expensePercentByCategoryTop[3]],
+                chart: {
+                    type: "radialBar",
+                    width: 72,
+                    height: 72,
+                    sparkline: {
+                        enabled: true
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                colors: ["#FF7777"],
+                stroke: {
+                    lineCap: "round"
+                },
+                plotOptions: {
+                    radialBar: {
+                        hollow: {
+                            margin: 0,
+                            size: "70%"
+                        },
+                        track: {
+                            margin: 0
+                        },
+                        dataLabels: {
+                            name: {
+                                show: false
+                            },
+                            value: {
+                                offsetY: 5,
+                                show: true
+                            }
+                        }
+                    }
+                }
+            };
+
+            var radialchart4 = new ApexCharts(document.querySelector("#radialchart-4"), radialoptions);
+            radialchart4.render();
+            });
+
+        </script>
+    </body>
+</html>

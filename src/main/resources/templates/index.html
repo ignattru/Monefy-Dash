@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" class="h-100" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Главная • Monefy Dash</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+        <link rel="stylesheet" th:href="@{/cover.css}" />
+        <link rel="shortcut icon" th:href="@{assets/images/favicon.ico}">
+    </head>
+    <body class="d-flex h-100 text-bg-dark">
+        <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+            <header class="mb-auto">
+                <div>
+                    <h3 class="float-md-start mb-0">Monefy Dash</h3>
+                    <nav class="nav nav-masthead justify-content-center float-md-end">
+                        <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="#">Велком</a>
+                        <a class="nav-link fw-bold py-1 px-0" href="start">Загрузить CSV</a>
+                        <a class="nav-link fw-bold py-1 px-0" href="donut">Поддержать проект</a>
+                    </nav>
+                </div>
+            </header>
+            <main class="px-3">
+                <h1>Monefy Dash</h1>
+                <h4>Сервис для аналитики личного бюджета</h4>
+                <p>Планируете личные или семейные финансы? Если фиксируете расходы в приложении Monefy, то импортируйте данные из приложения в сервис.</p>
+                <p>Monefy Dash визуализирует расходы и доходы за нужный период, покажет топ категорий по тратам, подсветит месяцы с самыми большими расходами и минимальными доходами. Графики помогут выявить аномалии в расходах, понять на какой категории можно сэкономить, выявить личную инфляцию, прогнозировать траты, прикинуть размер денежной подушки на случай кризиса.</p>
+                <p>Подпишитесь на канал проекта в <a href="https://t.me/monefydash">телеграм</a>. Там пишем о обновлениях сервиса и финансовых лайфхаках. Подписка очень поможет развитию проекта.</p>
+                <p class="fw-bold">Импорт данных:</p>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <ol>
+                                    <li>Запустите приложение Monefy на смартфоне</li>
+                                    <li>Перейдите в настройки</li>
+                                    <li>Нажмите - экспорт в файл</li>
+                                    <li>Оставьте настройки экспорта по умолчанию: UTF-8, c разделителем ';'</li>
+                                    <li>Нажмите 'Попробовать' ниже и загрузите CSV файл из Monefy</li>
+                                </ol>
+                                <p><a href="start" class="btn btn-lg btn-secondary fw-bold border-white bg-white">Попробовать</a></p>
+                                <p>Сервис не собирает никаких личных данных, и не хранит.</p>
+                            </div>
+                            <div class="col-sm-4"><img th:src="@{assets/images/logo_big.png}" width="220" height="320"></div>
+                        </div>
+                    </div>
+            </main>
+            <footer class="mt-auto text-white-50">
+                <p>С любовью к данным <a href="https://ignatt.ru/" class="text-white">Евгений Игнатуша</a>, твиттер: <a href="https://twitter.com/ignattru" class="text-white">@ignattru</a>.</p>
+            </footer>
+        </div>
+    </body>
+</html>
