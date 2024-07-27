@@ -1,0 +1,14 @@
+# Используем официальный образ OpenJDK
+FROM openjdk:17-jdk-slim
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Копируем файл war в контейнер
+COPY target/monefydash-0.0.1-SNAPSHOT.war app.war
+
+# Открываем порт, на котором будет работать приложение
+EXPOSE 8080
+
+# Запускаем приложение
+ENTRYPOINT ["java", "-jar", "app.war"]
