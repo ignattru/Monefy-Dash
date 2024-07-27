@@ -31,12 +31,12 @@ public class CSVImporter {
         List<Transaction> transactions = new ArrayList<>();
 
         try (
-                Reader reader = new InputStreamReader(file.getInputStream())) {
+            Reader reader = new InputStreamReader(file.getInputStream())) {
             CSVReader csvReader = new CSVReaderBuilder(reader)
                     .withCSVParser(new CSVParserBuilder().withSeparator(';').build())
                     .build();
 
-            // Читаем csv, пропускаем первую строку - заголовок, маппим поток строк в структуру данных - класс транзакция в листе.
+            // Пропускаем первую строку - заголовок, маппим поток строк в структуру данных - класс транзакция в листе.
             transactions = csvReader.readAll().stream()
                     .skip(1)
                     .map(record -> {

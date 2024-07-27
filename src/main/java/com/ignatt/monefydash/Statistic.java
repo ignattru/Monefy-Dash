@@ -12,14 +12,13 @@ public class Statistic {
         this.transactionList = transactionList;
     }
 
-    // Всего записей
+    // Всего записей в csv
     public Integer getCountTransactions() {
         return transactionList.size();
     }
 
     // Доходы по месяцам. Ключем будет строка с датой из класса с транзакциями,
-    // !!!!!!!!!ПЕРЕДЕЛАТЬ НА ЛИНКЕД ХЕШ МАП!!!TreeMap лучше чем хешмап здесь, в нем сразу отсротированные по ключам данные, нужен вывод с сортировкой по месяцам
-    // Если хотим получить доход за конкретный месяц то лучше хешмап, он быстрее по ключу возвращает
+    // TreeMap лучше чем хешмап здесь, в нем сразу сортировка по ключам, потому что нужен вывод с сортировкой по месяцам
     public TreeMap<String, Double> getMonthlyAmountByType(boolean isIncome, boolean isModule) {
         TreeMap<String, Double> sumByMonth = transactionList.stream()
                 .filter(transaction -> {
@@ -48,7 +47,7 @@ public class Statistic {
                 .reduce(0.0, Double::sum);
     }
 
-    // Расход и доход за все время самый большой в месяц
+    // Расход и доход за все время, самый большой в месяц (принимает 3 булевых значения, если доход isIncome, если нужно максимальное значение isMax, если нужно значение по модулю outputAbsolute)
     public Double getMaxMinMontlyAmountByType(boolean isIncome, boolean isMax, boolean outputAbsolute) {
         Map<String, Double> monthlyAmountMap = transactionList.stream()
                 .filter(transaction -> isIncome ? transaction.getAmount() >= 0 : transaction.getAmount() < 0)
@@ -59,7 +58,7 @@ public class Statistic {
                             return cal.get(Calendar.YEAR) + "-" + cal.get(Calendar.MONTH);
                         },
                         Collectors.summingDouble(Transaction::getAmount)));
-
+        // Если нужен максимальный
         if (isMax) {
             Double maxAmount = monthlyAmountMap.values().stream()
                     .mapToDouble(Math::abs)
@@ -73,7 +72,7 @@ public class Statistic {
         }
     }
 
-    // Перечень категорий и доходов по ним з все время (можно по модулю)
+    // Перечень категорий и доходов по ним за все время (можно по модулю)
     public TreeMap<String, Double> getExpenseByCategory(boolean isModule) {
         TreeMap<String, Double> sumByCategory = transactionList.stream()
                 .filter(transaction -> isModule ? transaction.getAmount() < 0 : transaction.getAmount() <= 0)

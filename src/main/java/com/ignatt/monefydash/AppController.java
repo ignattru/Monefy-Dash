@@ -30,7 +30,7 @@ public class AppController {
     @PostMapping("/upload")
     public String uploadCSV(@RequestParam("file") MultipartFile file, Model model) {
 
-        // Создаем импортер и перадем туда файл с формы
+        // Создаем импортер и передаем туда файл с формы
         CSVImporter csvImporter = CSVImporter.getImporter();
         List<Transaction> transactions = csvImporter.startImport(file);
 
@@ -38,14 +38,14 @@ public class AppController {
         System.out.println("statistic содержит " + statistic.getCountTransactions());
 
         // Информация о загруженном файле
-        // Имя файла
-        model.addAttribute("fileName", file.getOriginalFilename());
+            // Имя файла
+            model.addAttribute("fileName", file.getOriginalFilename());
 
-        // Размер файла, килобайты
-        model.addAttribute("fileSize", Math.round(file.getSize()/1024.0));
+            // Размер файла, килобайты
+            model.addAttribute("fileSize", Math.round(file.getSize()/1024.0));
 
-        // Количество записей в файле
-        model.addAttribute("fileNumRecords", statistic.getCountTransactions());
+            // Количество записей в файле
+            model.addAttribute("fileNumRecords", statistic.getCountTransactions());
 
         // Таблица всех транзакций
         model.addAttribute("transactions", transactions);
@@ -75,7 +75,7 @@ public class AppController {
         model.addAttribute("incomeData", statistic.getMonthlyAmountByType(true,true));
         model.addAttribute("expenseData", statistic.getMonthlyAmountByType(false,true));
 
-        // Данные для бублика
+        // Данные для бублика - расходы по всем категориям
         model.addAttribute("expenseByCategory", statistic.getExpenseByCategory(true));
 
         // Топ 4 категории расходов за все время
