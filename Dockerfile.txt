@@ -8,7 +8,7 @@ WORKDIR /app
 COPY target/monefydash-0.0.1-SNAPSHOT.war app.war
 
 # Открываем порт, на котором будет работать приложение
-EXPOSE 8080
+EXPOSE 80
 
 # Запускаем
-ENTRYPOINT ["java", "-jar", "app.war"]
+ENTRYPOINT ["java", "-jar", "app.war", "--server.port=80"]
