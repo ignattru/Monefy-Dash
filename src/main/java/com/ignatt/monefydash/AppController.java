@@ -5,12 +5,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Controller
 public class AppController {
+    private List<Transaction> transactionList = new ArrayList<>(); // Добавленное поле
 
     @GetMapping("/")
     public String showIndex() {
@@ -27,14 +32,65 @@ public class AppController {
         return "donut";
     }
 
+    @GetMapping("/sankey-data")
+@ResponseBody
+public Map<String, Object> getSankeyData() {
+    // Получаем данные о расходах по категориям (по модулю)
+    TreeMap<String, Double> expenseByCategory = new Statistic(transactionList).getExpenseByCategory(true);
+
+    // Создаем список узлов (nodes)
+    List<Map<String, Object>> nodes = new ArrayList<>();
+    nodes.add(Map.of(
+        "name", "Доход",
+        "color", "#399918"  // Зеленый цвет для дохода
+    ));
+
+    // Добавляем категории расходов как узлы с рандомными цветами
+    for (String category : expenseByCategory.keySet()) {
+        nodes.add(Map.of(
+            "name", category,
+            "color", getRandomColor()
+        ));
+    }
+
+    // Создаем список связей (links)
+    List<Map<String, Object>> links = new ArrayList<>();
+
+    // Добавляем связи от "Дохода" к каждой категории расходов
+    for (int i = 1; i < nodes.size(); i++) {
+        String category = (String) nodes.get(i).get("name");
+        double amount = expenseByCategory.get(category);
+
+        links.add(Map.of(
+            "from", "Доход",
+            "to", category,
+            "weight", amount
+        ));
+    }
+
+    return Map.of(
+        "nodes", nodes,
+        "links", links
+    );
+}
+
+// Метод для генерации случайного цвета в HEX-формате
+private String getRandomColor() {
+    String[] colors = {
+        "#FF7777", "#FFB347", "#FFCC33", "#A2C8FF", "#77DD77",
+        "#FFA07A", "#20B2AA", "#9370DB", "#F08080", "#6495ED",
+        "#DDA0DD", "#5F9EA0", "#FF7F50", "#4682B4", "#9ACD32"
+    };
+    return colors[(int) (Math.random() * colors.length)];
+}
+
     @PostMapping("/upload")
     public String uploadCSV(@RequestParam("file") MultipartFile file, Model model) {
-
         // Создаем импортер и передаем туда файл с формы
         CSVImporter csvImporter = CSVImporter.getImporter();
-        List<Transaction> transactions = csvImporter.startImport(file);
+        this.transactionList = csvImporter.startImport(file);
 
-        Statistic statistic = new Statistic(transactions);
+        Statistic statistic = new Statistic(transactionList);
         System.out.println("statistic содержит " + statistic.getCountTransactions());
 
         // Информация о загруженном файле
@@ -48,7 +104,7 @@ public class AppController {
             model.addAttribute("fileNumRecords", statistic.getCountTransactions());
 
         // Таблица всех транзакций
-        model.addAttribute("transactions", transactions);
+        model.addAttribute("transactions", transactionList);
 
         // Статистика по транзакциям
 
@@ -83,5 +139,4 @@ public class AppController {
 
         return "dashboard";
     }
-
 }

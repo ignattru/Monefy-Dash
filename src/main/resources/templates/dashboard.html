@@ -14,6 +14,8 @@
         <!-- DataTables -->
         <link th:href="@{assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css}" rel="stylesheet" type="text/css" />
         <link th:href="@{assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css}" rel="stylesheet" type="text/css" />
+
+
         <style type="text/css">
             .progress {
                 font-size: medium;
@@ -80,6 +82,20 @@
                             </div>
                         </div>
                         <!-- end top categories -->
+
+                        <!-- chart moneyflow -->
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div>
+                                            <div id="moneyflow"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end chart moneyflow -->
 
                         <!-- chart expenses and income -->
                         <div class="row">
@@ -343,6 +359,11 @@
         <!-- Responsive examples -->
         <script th:src="@{assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js}"></script>
         <script th:src="@{assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js}" ></script>
+
+        <!-- Moneyflow chart -->
+        <script th:src="@{assets/libs/sankey/highcharts.js}"></script>
+        <script th:src="@{assets/libs/sankey/sankey.js}"></script>
+        <script th:src="@{assets/libs/sankey/exporting.js}"></script>
 
         <script th:inline="javascript">
             $(document).ready(function(){
@@ -689,8 +710,34 @@
             };
 
             var radialchart4 = new ApexCharts(document.querySelector("#radialchart-4"), radialoptions);
-            radialchart4.render();
-            });
+            radialchart4.render();});
+
+            async function fetchSankeyData() {
+      const response = await fetch('/sankey-data');
+      return await response.json();
+    }
+
+    // Функция для построения диаграммы
+    function drawChart(data) {
+      Highcharts.chart('moneyflow', {
+        chart: {
+          type: 'sankey'
+        },
+        title: {
+          text: 'Денежный поток'
+        },
+        series: [{
+          keys: ['from', 'to', 'weight'],
+          data: data.links,
+          nodes: data.nodes
+        }]
+      });
+    }
+
+    // Загружаем данные и строим диаграмму
+    fetchSankeyData().then(data => {
+      drawChart(data);
+    });
 
         </script>
     </body>
