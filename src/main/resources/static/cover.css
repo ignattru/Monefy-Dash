@@ -33,11 +33,19 @@ h1, h2 {
 
 h3 {
     font-size: calc(1rem + 1vw);
+    color: #25be92;
 }
 
 h4 {
+    padding-bottom: 1rem;
+    padding-top: 2rem;
+    font-size: calc(1rem + 0.5vw);
+}
+
+h5 {
     padding-bottom: 20px;
     font-size: calc(1rem + 0.5vw);
+    color: #25be92;
 }
 
 a.textlink {
