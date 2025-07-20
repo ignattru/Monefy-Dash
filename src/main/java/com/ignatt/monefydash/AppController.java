@@ -35,32 +35,27 @@ public class AppController {
     @GetMapping("/sankey-data")
 @ResponseBody
 public Map<String, Object> getSankeyData() {
-    // Получаем данные о расходах по категориям (по модулю)
+    // Get expenses
     TreeMap<String, Double> expenseByCategory = new Statistic(transactionList).getExpenseByCategory(true);
 
-    // Создаем список узлов (nodes)
+    // Create nodes for sankey
     List<Map<String, Object>> nodes = new ArrayList<>();
     nodes.add(Map.of(
         "name", "Доход",
-        "color", "#399918"  // Зеленый цвет для дохода
+        "color", "#399918"
     ));
 
-    // Добавляем категории расходов как узлы с рандомными цветами
     for (String category : expenseByCategory.keySet()) {
         nodes.add(Map.of(
             "name", category,
             "color", getRandomColor()
         ));
     }
-
-    // Создаем список связей (links)
     List<Map<String, Object>> links = new ArrayList<>();
 
-    // Добавляем связи от "Дохода" к каждой категории расходов
     for (int i = 1; i < nodes.size(); i++) {
         String category = (String) nodes.get(i).get("name");
         double amount = expenseByCategory.get(category);
-
         links.add(Map.of(
             "from", "Доход",
             "to", category,
@@ -74,7 +69,7 @@ public Map<String, Object> getSankeyData() {
     );
 }
 
-// Метод для генерации случайного цвета в HEX-формате
+// Random colors
 private String getRandomColor() {
     String[] colors = {
         "#FF7777", "#FFB347", "#FFCC33", "#A2C8FF", "#77DD77",
@@ -86,55 +81,40 @@ private String getRandomColor() {
 
     @PostMapping("/upload")
     public String uploadCSV(@RequestParam("file") MultipartFile file, Model model) {
-        // Создаем импортер и передаем туда файл с формы
+        // Init importer
         CSVImporter csvImporter = CSVImporter.getImporter();
         this.transactionList = csvImporter.startImport(file);
-
         Statistic statistic = new Statistic(transactionList);
         System.out.println("statistic содержит " + statistic.getCountTransactions());
 
-        // Информация о загруженном файле
-            // Имя файла
-            model.addAttribute("fileName", file.getOriginalFilename());
+        // File info
+        model.addAttribute("fileName", file.getOriginalFilename());
+        model.addAttribute("fileSize", Math.round(file.getSize()/1024.0));
+        model.addAttribute("fileNumRecords", statistic.getCountTransactions());
 
-            // Размер файла, килобайты
-            model.addAttribute("fileSize", Math.round(file.getSize()/1024.0));
-
-            // Количество записей в файле
-            model.addAttribute("fileNumRecords", statistic.getCountTransactions());
-
-        // Таблица всех транзакций
+        // Transact table
         model.addAttribute("transactions", transactionList);
 
-        // Статистика по транзакциям
-
-        // Общий доход и расход за все время
+        // Statistic
         model.addAttribute("totalIncome", statistic.getTotalAmountByType(true));
         model.addAttribute("totalExpence", statistic.getTotalAmountByType(false));
 
-        // Самый большой ежемесячный доход и расход
         model.addAttribute("maxMonthlyIncome", statistic.getMaxMinMontlyAmountByType(true,true,false));
         model.addAttribute("maxMonthlyExpence", statistic.getMaxMinMontlyAmountByType(false,false,false));
 
-        // Самый маленький ежемесячный доход и расход
         model.addAttribute("minMonthlyIncome", statistic.getMaxMinMontlyAmountByType(true,false,false));
         model.addAttribute("minMonthlyExpence", statistic.getMaxMinMontlyAmountByType(false,true,false));
 
-        // Для определения границ графка нужно значение максимального ежемесячного расхода по модулю
         model.addAttribute("minMonthlyExpenceAbs", statistic.getMaxMinMontlyAmountByType(false,true,true));
 
-        // Доходы и расходы по месяцам
         model.addAttribute("monthlyIncomeAmountByType", statistic.getMonthlyAmountByType(true,false));
         model.addAttribute("monthlyExpenceAmountByType", statistic.getMonthlyAmountByType(false,false));
 
-        // Доходы и расходы по месяцам
         model.addAttribute("incomeData", statistic.getMonthlyAmountByType(true,true));
         model.addAttribute("expenseData", statistic.getMonthlyAmountByType(false,true));
 
-        // Данные для бублика - расходы по всем категориям
         model.addAttribute("expenseByCategory", statistic.getExpenseByCategory(true));
 
-        // Топ 4 категории расходов за все время
         model.addAttribute("expenseByCategoryTop", statistic.getTopExpenseByCategory(4,true));
 
         return "dashboard";
