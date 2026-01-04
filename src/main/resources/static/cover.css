@@ -25,15 +25,22 @@ body {
     padding: 1rem;
 }
 
-h1, h2 {
+h1 {
     color: #25be92;
-    font-size: calc(1.5rem + 1vw);
-    padding-top: 1rem;
+    font-size: calc(1rem + 1vw);
+}
+
+h2 {
+    padding-top: 2rem;
+    color: #25be92;
+    font-size: calc(0.4rem + 1vw);
 }
 
 h3 {
-    font-size: calc(1rem + 1vw);
     color: #25be92;
+    padding-bottom: 1rem;
+    padding-top: 2rem;
+    font-size: calc(0.4rem + 1vw);
 }
 
 h4 {
