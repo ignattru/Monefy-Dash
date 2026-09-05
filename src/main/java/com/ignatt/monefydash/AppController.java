@@ -1,21 +1,28 @@
 package com.ignatt.monefydash;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 @Controller
 public class AppController {
-    private List<Transaction> transactionList = new ArrayList<>(); // Добавленное поле
+    private static final Logger logger = LoggerFactory.getLogger(AppController.class);
+
+    private final CSVImporter csvImporter;
+    private final DashboardService dashboardService;
+
+    public AppController(CSVImporter csvImporter, DashboardService dashboardService) {
+        this.csvImporter = csvImporter;
+        this.dashboardService = dashboardService;
+    }
 
     @GetMapping("/")
     public String showIndex() {
@@ -23,7 +30,10 @@ public class AppController {
     }
 
     @GetMapping("/start")
-    public String showForm() {
+    public String showForm(Model model) {
+        if (!model.containsAttribute("errorMessage")) {
+            model.addAttribute("errorMessage", null);
+        }
         return "uploadForm";
     }
 
@@ -33,90 +43,54 @@ public class AppController {
     }
 
     @GetMapping("/sankey-data")
-@ResponseBody
-public Map<String, Object> getSankeyData() {
-    // Get expenses
-    TreeMap<String, Double> expenseByCategory = new Statistic(transactionList).getExpenseByCategory(true);
-
-    // Create nodes for sankey
-    List<Map<String, Object>> nodes = new ArrayList<>();
-    nodes.add(Map.of(
-        "name", "Доход",
-        "color", "#399918"
-    ));
-
-    for (String category : expenseByCategory.keySet()) {
-        nodes.add(Map.of(
-            "name", category,
-            "color", getRandomColor()
-        ));
+    @ResponseBody
+    public Map<String, Object> getSankeyData() {
+        List<Transaction> transactions = TransactionStore.getTransactions();
+        return dashboardService.buildSankeyData(transactions);
     }
-    List<Map<String, Object>> links = new ArrayList<>();
-
-    for (int i = 1; i < nodes.size(); i++) {
-        String category = (String) nodes.get(i).get("name");
-        double amount = expenseByCategory.get(category);
-        links.add(Map.of(
-            "from", "Доход",
-            "to", category,
-            "weight", amount
-        ));
-    }
-
-    return Map.of(
-        "nodes", nodes,
-        "links", links
-    );
-}
-
-// Random colors
-private String getRandomColor() {
-    String[] colors = {
-        "#FF7777", "#FFB347", "#FFCC33", "#A2C8FF", "#77DD77",
-        "#FFA07A", "#20B2AA", "#9370DB", "#F08080", "#6495ED",
-        "#DDA0DD", "#5F9EA0", "#FF7F50", "#4682B4", "#9ACD32"
-    };
-    return colors[(int) (Math.random() * colors.length)];
-}
 
     @PostMapping("/upload")
-    public String uploadCSV(@RequestParam("file") MultipartFile file, Model model) {
-        // Init importer
-        CSVImporter csvImporter = CSVImporter.getImporter();
-        this.transactionList = csvImporter.startImport(file);
-        Statistic statistic = new Statistic(transactionList);
-        System.out.println("statistic содержит " + statistic.getCountTransactions());
+    public String uploadCSV(@RequestParam("file") MultipartFile file,
+                            Model model,
+                            RedirectAttributes redirectAttributes) {
+        logger.info("Загрузка файла: {}, размер: {} bytes", file.getOriginalFilename(), file.getSize());
 
-        // File info
-        model.addAttribute("fileName", file.getOriginalFilename());
-        model.addAttribute("fileSize", Math.round(file.getSize()/1024.0));
-        model.addAttribute("fileNumRecords", statistic.getCountTransactions());
+        if (file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Файл не выбран или пуст.");
+            return "redirect:/start";
+        }
 
-        // Transact table
-        model.addAttribute("transactions", transactionList);
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".csv")) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Пожалуйста, загрузите файл в формате CSV.");
+            return "redirect:/start";
+        }
 
-        // Statistic
-        model.addAttribute("totalIncome", statistic.getTotalAmountByType(true));
-        model.addAttribute("totalExpence", statistic.getTotalAmountByType(false));
+        try {
+            List<Transaction> transactions = csvImporter.startImport(file);
+            TransactionStore.setTransactions(transactions);
 
-        model.addAttribute("maxMonthlyIncome", statistic.getMaxMinMontlyAmountByType(true,true,false));
-        model.addAttribute("maxMonthlyExpence", statistic.getMaxMinMontlyAmountByType(false,false,false));
+            if (transactions.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Не удалось импортировать ни одной транзакции. Проверьте формат файла.");
+                return "redirect:/start";
+            }
 
-        model.addAttribute("minMonthlyIncome", statistic.getMaxMinMontlyAmountByType(true,false,false));
-        model.addAttribute("minMonthlyExpence", statistic.getMaxMinMontlyAmountByType(false,true,false));
+            Map<String, Object> dashboardModel = dashboardService.prepareDashboardModel(transactions, file);
+            model.addAllAttributes(dashboardModel);
 
-        model.addAttribute("minMonthlyExpenceAbs", statistic.getMaxMinMontlyAmountByType(false,true,true));
-
-        model.addAttribute("monthlyIncomeAmountByType", statistic.getMonthlyAmountByType(true,false));
-        model.addAttribute("monthlyExpenceAmountByType", statistic.getMonthlyAmountByType(false,false));
-
-        model.addAttribute("incomeData", statistic.getMonthlyAmountByType(true,true));
-        model.addAttribute("expenseData", statistic.getMonthlyAmountByType(false,true));
-
-        model.addAttribute("expenseByCategory", statistic.getExpenseByCategory(true));
-
-        model.addAttribute("expenseByCategoryTop", statistic.getTopExpenseByCategory(4,true));
-
-        return "dashboard";
+            logger.info("Файл успешно обработан, транзакций: {}", transactions.size());
+            return "dashboard";
+        } catch (IOException e) {
+            logger.error("Ошибка при чтении файла", e);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Произошла ошибка при чтении файла. Попробуйте ещё раз.");
+            return "redirect:/start";
+        } catch (Exception e) {
+            logger.error("Неожиданная ошибка при импорте", e);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Внутренняя ошибка сервера. Пожалуйста, повторите попытку позже.");
+            return "redirect:/start";
+        }
     }
 }

@@ -26,14 +26,15 @@
     <main class="px-3">
         <div class="container">
             <h2>Загрузка CSV</h2>
-            <h3>Здесь вы можете загрузить CSV-файл из Monefy</h3>
+            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
             <div class="row">
                 <div class="col-sm-7">
                     <div id="drop-area">
                         <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
-                            <input type="file" name="file" id="fileinput" style="display: none; width: 100%;" accept=".csv">
+                            <input type="file" name="file" id="fileinput" style="display: none;" accept=".csv">
                             <label for="fileinput" class="btn btn-md btn-secondary fw-normal border-white bg-white">Выберите файл</label>
-                            <input type="submit" class="btn btn-md btn-secondary fw-normal border-white bg-white" style="display: none; width: 100%;" value="Загрузить">
+                            <input type="submit" class="btn btn-md btn-secondary fw-normal border-white bg-white" style="display: none;" value="Загрузить">
                         </form>
                     </div>
                     <div id="fileInfo" style="margin-top: 10px;"></div>
@@ -100,12 +101,12 @@
     function handleFiles(files) {
         if (files.length > 0) {
             var file = files[0];
-            if (file.type !== 'text/csv') {
+            if (file.type !== 'text/csv' && !file.name.toLowerCase().endsWith('.csv')) {
                 alert('Пожалуйста, выберите файл в формате CSV.');
                 return;
             }
-            fileInput.files = files; // Устанавливаем выбранные файлы в input
-            submitButton.style.display = 'block';  // Активируем кнопку отправки
+            fileInput.files = files;
+            submitButton.style.display = 'block';
             inputButton.style.display = 'none';
             displayFileInfo(file);
         }
