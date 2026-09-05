@@ -26,8 +26,6 @@
     <main class="px-3">
         <div class="container">
             <h2>Загрузка CSV</h2>
-
-            <!-- Блок ошибки -->
             <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
 
             <div class="row">
@@ -57,7 +55,6 @@
 </div>
 
 <script>
-    // Тот же скрипт, что и раньше (без изменений)
     var droparea = document.getElementById('drop-area');
     var fileInput = document.getElementById('fileinput');
     var uploadForm = document.getElementById('upload-form');
