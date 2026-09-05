@@ -147,7 +147,7 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="flex-grow-1">
-                                                                    <p class="text-muted mb-2">Максимальный доход</p>
+                                                                    <p class="text-muted mb-2">Максимальный доход в мес.</p>
                                                                     <h4><span th:text="${maxMonthlyIncome}" class="badge bg-success"></span></h4>
                                                                 </div>
                                                             </div>
@@ -160,7 +160,7 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="flex-grow-1">
-                                                                    <p class="text-muted mb-2">Минимальный доход</p>
+                                                                    <p class="text-muted mb-2">Минимальный доход в мес.</p>
                                                                     <h4><span th:text="${minMonthlyIncome}" class="badge bg-success"></span></h4>
                                                                 </div>
                                                             </div>
@@ -204,7 +204,7 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="flex-grow-1">
-                                                                    <p class="text-muted mb-2">Максимальный расход</p>
+                                                                    <p class="text-muted mb-2">Максимальный расход в мес.</p>
                                                                     <h4><span th:text="${maxMonthlyExpence}" class="badge bg-danger"></span></h4>
                                                                 </div>
                                                             </div>
@@ -217,7 +217,7 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="flex-grow-1">
-                                                                    <p class="text-muted mb-2">Минимальный расход</p>
+                                                                    <p class="text-muted mb-2">Минимальный расход в мес.</p>
                                                                     <h4><span th:text="${minMonthlyExpence}" class="badge bg-danger"></span></h4>
                                                                 </div>
                                                             </div>
@@ -370,12 +370,10 @@
             $(document).ready(function(){
                 var options, chart;
 
-                // Данные о доходах и расходах в месяц для линейного графика
                 var timeData = [];
                 var incomeData = [];
                 var expenseData = [];
 
-                // Планка минимального максимального значения для линейного графика
                 var minValueForPlot = 0;
                 var maxIncome = [[${maxMonthlyIncome}]];
                 var maxExpence = [[${minMonthlyExpenceAbs}]];
@@ -385,21 +383,15 @@
                 console.log('maxExpence Data:', maxExpence);
                 console.log('maxValueForPlot Data:', maxValueForPlot);
 
-
-                // Все категории и суммы затрат по ним за все время
                 var expenseCategory = [];
                 var expenseSumByCategory = [];
 
-                // Топ-4 категории и суммы затрат по ним
                 var expenseCategoryTop = [];
                 var expenseSumByCategoryTop = [];
 
-                // Для расчета процента от общего расхода
                 var expensePercentByCategoryTop = [];
                 var totalExpence = [[${totalExpence}]];
 
-
-                // Передача данных с бэка на страницу
                 /*[# th:each="entry : ${incomeData}"]*/
                 timeData.push([[${entry.key}]]);
                 incomeData.push([[${entry.value}]]);
@@ -420,11 +412,9 @@
                 /*[/]*/
 
                 for (var i = 0; i < expenseSumByCategoryTop.length; i++) {
-                    // Вычисление процента и округление до целого числа
                     var percent = Math.abs(Math.round((expenseSumByCategoryTop[i] / totalExpence) * 100));
                     expensePercentByCategoryTop.push(percent);
                 }
-
 
                 console.log('Income Data:', incomeData);
                 console.log('Expense Data:', expenseData);
@@ -526,7 +516,6 @@
                     return color;
                 }
 
-                // Генерация цветов для каждой категории
                 var colors = [];
                 for (var i = 0; i < expenseCategory.length; i++) {
                     colors.push(generateRandomColor());
@@ -718,14 +707,13 @@
       return await response.json();
     }
 
-    // Функция для построения диаграммы
     function drawChart(data) {
       Highcharts.chart('moneyflow', {
         chart: {
           type: 'sankey'
         },
         title: {
-          text: 'Денежный поток'
+          text: 'Расход по категориям за все время'
         },
         series: [{
           keys: ['from', 'to', 'weight'],
@@ -735,7 +723,6 @@
       });
     }
 
-    // Загружаем данные и строим диаграмму
     fetchSankeyData().then(data => {
       drawChart(data);
     });
